@@ -147,16 +147,16 @@ export async function getIncomeOverview(req, res) {
         const { range = 'monthly' } = req.query;
         const { start, end } = getDateRange(range);
 
-        const incomes = await incomeModel.find({
+        const income = await incomeModel.find({
             userId,
             date: { $gte: start, $lte: end }
         }).sort({ date: -1 });
 
-        const totalIncome = incomes.reduce((acc, cur) => acc + cur.amount, 0);
-        const averageIncome = incomes.length > 0 ? totalIncome / income.length : 0;
-        const numberOfTransactions = incomes.length;
+        const totalIncome = income.reduce((acc, cur) => acc + cur.amount, 0);
+        const averageIncome = income.length > 0 ? totalIncome / income.length : 0;
+        const numberOfTransactions = income.length;
 
-        const recentTransactions = incomes.slice(0, 9);
+        const recentTransactions = income.slice(0, 9);
 
         res.json({
             success: true,
