@@ -1,8 +1,8 @@
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { sidebarStyles, cn } from "../assets/dummyStyles"
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useRef, useState } from "react";
-import { ArrowDown, ArrowUp, Home, User } from "lucide-react";
+import { ArrowDown, ArrowUp, HelpCircle, Home, LogOut, Menu, User, X } from "lucide-react";
 
 const MENU_ITEMS = [
     { text: 'Dashboard', path: '/', icon: <Home size={20} /> },
@@ -127,11 +127,112 @@ const Sidebar = ({ user, isCollapsed, setIsCollapsed }) => {
                             <div className={sidebarStyles.userInitials.base}>
                                 {initial}
                             </div>
+                            {!isCollapsed && (
+                                <motion.div
+                                    className="ml-3 overflow-hidden"
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -10 }}
+                                >
+                                    <h2 className="text-sm font-bold text-gray-800 truncate">
+                                        {username}
+                                    </h2>
+                                    <p className="text-xs text-gray-500 truncate">
+                                        {email}
+                                    </p>
+                                </motion.div>
+                            )}
                         </div>
                     </div>
-                </div>
+                    <div className="flex-1 overflow-y-auto py-4 custom-scrollbar">
+                        <ul className={sidebarStyles.menuList.base}>
+                            {MENU_ITEMS.map(renderMenuItem)}
+                        </ul>
+                    </div>
 
+                    <div className={cn(
+                        sidebarStyles.footerContainer.base,
+                        isCollapsed ? sidebarStyles.footerContainer.collapsed : sidebarStyles.footerContainer.expanded
+                    )}>
+                        <Link
+                            className={cn(
+                                sidebarStyles.footerLink.base,
+                                isCollapsed && sidebarStyles.footerLink.collapsed,
+                            )}
+                            to="https://github.com/Crocodilka1/track_expense"
+                        >
+                            <HelpCircle size={20} className="text-gray-500" />
+                            {!isCollapsed && <span>Support</span>}
+                        </Link>
+                        <button onClick={handleLogout} className={cn(
+                            sidebarStyles.logoutButton.base,
+                            isCollapsed && sidebarStyles.logoutButton.collapsed
+                        )}>
+                            <LogOut size={20} className="text-gray-500" />
+                            {!isCollapsed && <span>LogOut</span>}
+                        </button>
+                    </div>
+                </div>
             </motion.div>
+
+            <motion.button onClick={() => setMobileOpen((prev) => !prev)}
+                className={sidebarStyles.mobileMenuButton}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+            >
+                {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+            </motion.button>
+
+            <AnimatePresence>
+                {mobileOpen && (
+                    <motion.div
+                        className={sidebarStyles.mobileOverlay}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                    >
+                        <motion.div
+                            className={sidebarStyles.mobileBackdrop}
+                            onClick={() => setMobileOpen(false)}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                        />
+
+                        <motion.div
+                            ref={sidebarRef}
+                            className={sidebarStyles.mobileSidebar.base}
+                            initial={{ x: "-100%" }}
+                            animate={{ x: 0 }}
+                            exit={{ x: "-100%" }}
+                            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                        >
+                            <div className="relative h-full flex flex-col">
+                                <div className={sidebarStyles.mobileHeader}>
+                                    <div className={sidebarStyles.mobileUserContainer}>
+                                        <div className={sidebarStyles.userInitials.base}>
+                                            {initial}
+                                        </div>
+                                        <div>
+                                            <h2 className="text-lg font-bold text-gray-800">
+                                                {username}
+                                            </h2>
+                                            <p className="text-sm text-gray-500">
+                                                {email}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <button onClick={() => setMobileOpen(false)}
+                                        className={sidebarStyles.mobileCloseButton}
+                                    >
+                                        <X sixe={24} className="text-gray-600" />
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </>
     )
 }
