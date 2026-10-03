@@ -3,7 +3,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { styles } from '../assets/dummyStyles.js';
 import Navbar from './Navbar.jsx';
 import axios from 'axios';
-import { Activity, ArrowDown, ArrowUp, Car, CreditCard, Gift, Home, PiggyBank, RussianRuble, ShoppingCart, TrendingUp, Utensils, Zap } from 'lucide-react';
+import { Activity, ArrowDown, ArrowUp, Car, ChevronDown, ChevronUp, Clock, CreditCard, Gift, Home, Info, PieChart, PiggyBank, RefreshCw, RussianRuble, ShoppingCart, TrendingUp, Utensils, Zap } from 'lucide-react';
+import { Outlet } from 'react-router-dom';
 
 const API_URL = 'http://localhost:4000/api';
 const CATEGORY_ICONS = {
@@ -391,7 +392,142 @@ const Layout = ({ onLogout, user }) => {
                 <h3 className={styles.cards.title}>
                   <TrendingUp className=' w-6 h-6 text-teal-500' />
                   Financial Overview
+                  <span className=' text-sm text-gray-500 font-normal'>
+                    ({timeFrameLabel})
+                  </span>
                 </h3>
+              </div>
+              <Outlet context={outletContext} />
+            </div>
+          </div>
+
+          <div className={styles.grid.rightColumn}>
+            <div className={styles.cards.base}>
+              <div className={styles.transactions.cardHeader}>
+                <h3 className={styles.transactions.cardTitle}>
+                  <Clock className=' w-6 h-6 text-purple-500' />
+                  Recent Transactions
+                </h3>
+                <button onClick={fetchTransactions} disabled={loading} className={styles.transactions.refreshButton}>
+                  <RefreshCw className={styles.transactions.refreshIcon(loading)} />
+                </button>
+              </div>
+
+              <div className={styles.transactions.dataStackingInfo}>
+                <Info className={styles.transactions.dataStackingIcon} />
+                <span>
+                  Tranasctions are stacked by date (newest first)
+                </span>
+              </div>
+
+              <div className={styles.transactions.listContainer}>
+                {displayedTransactions.map((transaction) => {
+                  const { id, type, category, description, date, amount } = transaction;
+                  return (
+                    <div key={id} className={styles.transactions.transactionItem}>
+                      <div className=' flex items-center gap-1 md:gap-4 lg:gap-3'>
+                        <div className={`p-2 rounded-lg ${styles.colors.transaction.bg(type)}`}>
+                          {CATEGORY_ICONS[category] || (
+                            <RussianRuble className={styles.transactions.icon} />
+                          )}
+                        </div>
+
+                        <div className={styles.transactions.details}>
+                          <p className={styles.transactions.description}>
+                            {description}
+                          </p>
+
+                          <p className={styles.transactions.meta}>
+                            {new Date(date).toLocaleDateString()}
+                            <span className=" ml-2 capitalize">
+                              {category}
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+
+                      <span className={styles.colors.transaction.text(type)}>
+                        {type === 'income' ? '+' : '-'}P{Number(amount)}
+                      </span>
+                    </div>
+                  )
+                })}
+
+                {transactions.length === 0 ? (
+                  <div className={styles.transactions.emptyState}>
+                    <div className={styles.transactions.emptyIconContainer}>
+                      <Clock className={styles.transactions.emptyIcon} />
+                    </div>
+                    <p className={styles.transactions.emptyText}>
+                      No recent transactions
+                    </p>
+                  </div>
+                ) : (
+                  <div className={styles.transactions.viewAllContainer}>
+                    <button onClick={() => setShowAllTransactions(!showAllTransactions)} className={styles.transactions.viewAllButton}>
+                      {showAllTransactions ? (
+                        <>
+                          <ChevronUp className=" w-5 h-5" />
+                          Show Less
+                        </>
+                      ) : (
+                        <>
+                          <ChevronDown className=' w-5 h-5' />
+                          View All Transactions ({transactions.length})
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className={styles.cards.base}>
+              <h3 className={styles.categories.title}>
+                <PieChart className={styles.categories.titleIcon} />
+                Spending by Category
+              </h3>
+
+              <div className={styles.categories.list}>
+                {topCategories.map(([category, amount]) => (
+                  <div key={category} className={styles.categories.categoryItem}>
+                    <div className=' flex items-center gap-3'>
+                      <div className={styles.categories.categoryIconContainer}>
+                        {CATEGORY_ICONS[category] || (
+                          <RussianRuble className={styles.categories.categoryIcon}/>
+                        )}
+                      </div>
+                      <span className={styles.categories.categoryName}>
+                        {category}
+                      </span>
+                    </div>
+                    <span className={styles.categories.categoryAmount}>
+                      P{amount}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <div className={styles.categories.summaryContainer}>
+                <div className={styles.categories.summaryGrid}>
+                  <div className={styles.categories.summaryIncomeCard}>
+                    <p className={styles.categories.summaryTitle}>
+                      Total Income
+                    </p>
+                    <p className={styles.categories.summaryValue}>
+                      P{stats.allTimeIncome.toLocaleString()}
+                    </p>
+                  </div>
+
+                  <div className={styles.categories.summaryExpenseCard}>
+                    <p className={styles.categories.summaryTitle}>
+                      Total Expense
+                    </p>
+                    <p className={styles.categories.summaryValue}>
+                      P{stats.allTimeExpenses.toLocaleString()}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
