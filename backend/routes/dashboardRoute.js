@@ -4,6 +4,6 @@ import { getDashboardOverview } from "../controllers/dashboardController.js";
 
 const dashboardRouter = express.Router();
 
-dashboardRouter.get('/', authMiddleware, getDashboardOverview);
+dashboardRouter.get("/", authMiddleware, getDashboardOverview);
 
 export default dashboardRouter;
